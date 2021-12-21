@@ -13,8 +13,8 @@ class JavaField:
     def get_modifier(self):
         return self.modifier
 
-    def set_type(self, type):
-        self.type = type
+    def set_type(self, field_type):
+        self.type = field_type
 
     def get_type(self):
         return self.type
