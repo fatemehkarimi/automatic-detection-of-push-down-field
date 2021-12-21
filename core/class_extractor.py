@@ -13,3 +13,4 @@ class ClassExtractor:
             walker = TreeWalker(listener)
             walker.walk(stream)
             listener = walker.get_listener()
+

@@ -3,13 +3,18 @@ class Container:
         self.dict = {}
 
     def add_element(self, elm):
-        self.dict[elm.get_name()] = elm
+        self.dict[elm.get_identifier()] = elm
 
-    def has_element(self, name):
-        return name in self.dict
+    def has_element(self, identifier):
+        return identifier in self.dict
 
-    def get_element_by_name(self, name):
-        return self.dict.get(name)
+    def get_element_by_identifier(self, identifier):
+        return self.dict.get(identifier)
 
-    def remove_element_by_name(self, name):
-        self.dict.pop(name)
+    def remove_element_by_identifier(self, identifier):
+        self.dict.pop(identifier)
+
+    def element_list(self):
+        for key, element in self.dict.items():
+            yield element
+

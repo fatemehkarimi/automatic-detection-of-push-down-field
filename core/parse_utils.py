@@ -1,0 +1,17 @@
+def get_primitive_type(primitive_type):
+    if primitive_type.BOOLEAN():
+        return "boolean"
+    if primitive_type.CHAR():
+        return "char"
+    if primitive_type.BYTE():
+        return "byte"
+    if primitive_type.SHORT():
+        return "short"
+    if primitive_type.INT():
+        return "int"
+    if primitive_type.LONG():
+        return "long"
+    if primitive_type.FLOAT():
+        return "float"
+    if primitive_type.DOUBLE():
+        return "double"
