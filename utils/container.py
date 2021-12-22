@@ -17,4 +17,3 @@ class Container:
     def element_list(self):
         for key, element in self.dict.items():
             yield element
-

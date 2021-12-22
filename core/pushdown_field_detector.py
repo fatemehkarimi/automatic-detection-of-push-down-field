@@ -5,6 +5,8 @@ class PushDownFieldDetector:
     def __init__(self, project_path):
         self.project_path = project_path
         self.class_extractor = ClassExtractor(project_path)
+        self.project_class_container = None
 
     def extract_project_structure(self):
         self.class_extractor.extract_all_classes()
+        self.project_class_container = self.class_extractor.get_project_classes()
