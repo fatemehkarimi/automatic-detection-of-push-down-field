@@ -18,3 +18,6 @@ class JavaMethod:
 
     def parameter_list(self):
         yield from self.parameter_container.element_list()
+
+    def local_variable_list(self):
+        yield from self.local_variable_container.element_list()
