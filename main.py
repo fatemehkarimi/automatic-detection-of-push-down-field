@@ -5,7 +5,8 @@ from core.pushdown_field_detector import PushDownFieldDetector
 
 def main(arguments):
     detector = PushDownFieldDetector(arguments.path)
-    detector.extract_project_structure()
+    detector.extract_project_classes()
+    detector.extract_field_usage()
 
 
 if __name__ == "__main__":
