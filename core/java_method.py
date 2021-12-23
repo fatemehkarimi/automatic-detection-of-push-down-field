@@ -21,3 +21,12 @@ class JavaMethod:
 
     def local_variable_list(self):
         yield from self.local_variable_container.element_list()
+
+    def has_variable_in_scope(self, var):
+        for param in self.parameter_container.element_list():
+            if var.get_identifier() == param.get_identifier():
+                return True
+        for local_var in self.local_variable_container.element_list():
+            if var.get_identifier() == local_var.get_identifier():
+                return True
+        return False

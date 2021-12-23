@@ -11,6 +11,12 @@ class FieldUsageListener(JavaParserLabeledListener):
         self.class_container = class_container
         self.class_stack = []
         self.current_method = None
+        self.used_variable_container = None
+        self.var_referencing_field_container = None
+        self.reset_method()
+
+    def reset_method(self):
+        self.current_method = None
         self.used_variable_container = Container()
         self.var_referencing_field_container = Container()
 
@@ -27,7 +33,13 @@ class FieldUsageListener(JavaParserLabeledListener):
         self.current_method = JavaMethod(ctx.IDENTIFIER().getText())
 
     def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
-        self.current_method = None
+        if not self.current_method:
+            return
+
+        for used_var in self.used_variable_container.element_list():
+            if not self.current_method.has_variable_in_scope(used_var):
+                self.var_referencing_field_container.add_element(used_var)
+        self.reset_method()
 
     def enterFormalParameter(self, ctx:JavaParserLabeled.FormalParameterContext):
         if not self.current_method:
@@ -75,3 +87,24 @@ class FieldUsageListener(JavaParserLabeledListener):
         if ctx.expression().primary().THIS():
             j_field = JavaField(ctx.IDENTIFIER().getText())
             self.var_referencing_field_container.add_element(j_field)
+
+    # variables defined in catch statement
+    def enterCatchClause(self, ctx:JavaParserLabeled.CatchClauseContext):
+        if not self.current_method:
+            return
+        if ctx.IDENTIFIER():
+            self.current_method.add_local_variable(JavaField(ctx.IDENTIFIER().getText()))
+
+    # variables defined in for(.. : ..) structure
+    def enterEnhancedForControl(self, ctx:JavaParserLabeled.EnhancedForControlContext):
+        if not self.current_method:
+            return
+        variable_type = None
+        if ctx.typeType().classOrInterfaceType():
+            for var in ctx.typeType().classOrInterfaceType().IDENTIFIER():
+                variable_type = var.getText()
+        if ctx.typeType().primitiveType():
+            variable_type = get_primitive_type(ctx.typeType().primitiveType())
+        j_field = JavaField(ctx.variableDeclaratorId().IDENTIFIER().getText())
+        j_field.set_type(variable_type)
+        self.current_method.add_local_variable(j_field)
