@@ -20,6 +20,11 @@ class FieldUsageListener(JavaParserLabeledListener):
         self.used_variable_container = Container()
         self.var_referencing_field_container = Container()
 
+    def set_class_used_fields(self):
+        j_class = self.class_stack[-1]
+        for used_var in self.var_referencing_field_container.element_list():
+            j_class.add_used_field(used_var)
+
     def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         j_class = self.class_container.get_element_by_identifier(ctx.IDENTIFIER().getText())
         if not j_class:
@@ -33,12 +38,33 @@ class FieldUsageListener(JavaParserLabeledListener):
         self.current_method = JavaMethod(ctx.IDENTIFIER().getText())
 
     def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
-        if not self.current_method:
+        if not (self.current_method and self.class_stack):
+            self.reset_method()
             return
 
         for used_var in self.used_variable_container.element_list():
             if not self.current_method.has_variable_in_scope(used_var):
                 self.var_referencing_field_container.add_element(used_var)
+
+        self.set_class_used_fields()
+        self.reset_method()
+
+    def enterConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+        # we only care about class constructors
+        if not self.class_stack:
+            return
+        self.current_method = JavaMethod(self.class_stack[-1].get_identifier())
+
+    def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+        if not(self.current_method and self.class_stack):
+            self.reset_method()
+            return
+
+        for used_var in self.used_variable_container.element_list():
+            if not self.current_method.has_variable_in_scope(used_var):
+                self.var_referencing_field_container.add_element(used_var)
+
+        self.set_class_used_fields()
         self.reset_method()
 
     def enterFormalParameter(self, ctx:JavaParserLabeled.FormalParameterContext):
@@ -87,6 +113,16 @@ class FieldUsageListener(JavaParserLabeledListener):
         if ctx.expression().primary().THIS() and ctx.IDENTIFIER():
             j_field = JavaField(ctx.IDENTIFIER().getText())
             self.var_referencing_field_container.add_element(j_field)
+
+    # variables used in constructors
+    def enterExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+        if not self.current_method:
+            return
+        if not (isinstance(ctx.expression(), JavaParserLabeled.Expression0Context)
+                and isinstance(ctx.expression().primary(), JavaParserLabeled.Primary4Context)):
+            return
+        used_var = JavaField(ctx.primary().IDENTIFIER().getText())
+        self.used_variable_container.add_element(used_var)
 
     # variables defined in catch statement
     def enterCatchClause(self, ctx:JavaParserLabeled.CatchClauseContext):
