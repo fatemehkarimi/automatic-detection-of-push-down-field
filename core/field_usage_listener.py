@@ -84,7 +84,7 @@ class FieldUsageListener(JavaParserLabeledListener):
                 and isinstance(ctx.expression().primary(), JavaParserLabeled.Primary1Context)):
             return
 
-        if ctx.expression().primary().THIS():
+        if ctx.expression().primary().THIS() and ctx.IDENTIFIER():
             j_field = JavaField(ctx.IDENTIFIER().getText())
             self.var_referencing_field_container.add_element(j_field)
 
