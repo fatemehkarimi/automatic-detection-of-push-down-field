@@ -20,12 +20,12 @@ class ClassExtractorListener(JavaParserLabeledListener):
         j_class = JavaClass(ctx.IDENTIFIER().getText())
         if ctx.EXTENDS():
             for parent in ctx.typeType().classOrInterfaceType().IDENTIFIER():
-                j_class.add_parent(parent.getText())
+                j_class.add_parent_identifier(parent.getText())
 
         if ctx.IMPLEMENTS():
             for interface in ctx.typeList().typeType():
                 for parent in interface.classOrInterfaceType().IDENTIFIER():
-                    j_class.add_parent(parent.getText())
+                    j_class.add_parent_identifier(parent.getText())
 
         self.class_stack.append(j_class)
         self.class_container.add_element(j_class)
@@ -87,7 +87,7 @@ class ClassExtractorListener(JavaParserLabeledListener):
         if ctx.EXTENDS():
             for parent in ctx.typeList().typeType():
                 for identifier in parent.classOrInterfaceType().IDENTIFIER():
-                    j_interface.add_parent((identifier.getText()))
+                    j_interface.add_parent_identifier((identifier.getText()))
         self.class_stack.append(j_interface)
         self.class_container.add_element(j_interface)
 
