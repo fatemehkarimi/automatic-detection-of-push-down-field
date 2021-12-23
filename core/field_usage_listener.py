@@ -3,6 +3,7 @@ from gen.JavaParserLabeled import  JavaParserLabeled
 from .java_method import JavaMethod
 from .java_field import JavaField
 from .parse_utils import get_primitive_type
+from utils.container import Container
 
 
 class FieldUsageListener(JavaParserLabeledListener):
@@ -10,6 +11,8 @@ class FieldUsageListener(JavaParserLabeledListener):
         self.class_container = class_container
         self.class_stack = []
         self.current_method = None
+        self.used_variable_container = Container()
+        self.var_referencing_field_container = Container()
 
     def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         j_class = self.class_container.get_element_by_identifier(ctx.IDENTIFIER().getText())
@@ -52,3 +55,23 @@ class FieldUsageListener(JavaParserLabeledListener):
             j_field = JavaField(var.variableDeclaratorId().IDENTIFIER().getText())
             j_field.set_type(variable_type)
             self.current_method.add_local_variable(j_field)
+
+    def enterExpression0(self, ctx:JavaParserLabeled.Expression0Context):
+        if not self.current_method:
+            return
+        if not isinstance(ctx.primary(), JavaParserLabeled.Primary4Context):
+            return
+        used_var = JavaField(ctx.primary().IDENTIFIER().getText())
+        self.used_variable_container.add_element(used_var)
+
+    def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        if not self.current_method:
+            return
+
+        if not (isinstance(ctx.expression(), JavaParserLabeled.Expression0Context)
+                and isinstance(ctx.expression().primary(), JavaParserLabeled.Primary1Context)):
+            return
+
+        if ctx.expression().primary().THIS():
+            j_field = JavaField(ctx.IDENTIFIER().getText())
+            self.var_referencing_field_container.add_element(j_field)
