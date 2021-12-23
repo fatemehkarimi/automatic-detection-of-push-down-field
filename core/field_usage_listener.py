@@ -34,11 +34,35 @@ class FieldUsageListener(JavaParserLabeledListener):
     def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         self.class_stack.pop()
 
+    def enterInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
+        j_class = self.class_container.get_element_by_identifier(ctx.IDENTIFIER().getText())
+        if not j_class:
+            raise Exception("class does not found in field usage extractor. this should not happen")
+        self.class_stack.append(j_class)
+
+    def exitInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
+        self.class_stack.pop()
+
     def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         self.current_method = JavaMethod(ctx.IDENTIFIER().getText())
 
     def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         if not (self.current_method and self.class_stack):
+            self.reset_method()
+            return
+
+        for used_var in self.used_variable_container.element_list():
+            if not self.current_method.has_variable_in_scope(used_var):
+                self.var_referencing_field_container.add_element(used_var)
+
+        self.set_class_used_fields()
+        self.reset_method()
+
+    def enterInterfaceMethodDeclaration(self, ctx:JavaParserLabeled.InterfaceMethodDeclarationContext):
+        self.current_method = JavaMethod(ctx.IDENTIFIER().getText())
+
+    def exitInterfaceMethodDeclaration(self, ctx:JavaParserLabeled.InterfaceMethodDeclarationContext):
+        if not(self.current_method and self.class_stack):
             self.reset_method()
             return
 
