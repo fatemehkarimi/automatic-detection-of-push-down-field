@@ -5,6 +5,7 @@ class JavaClass:
     def __init__(self, identifier):
         self.identifier = identifier
         self.parent_container = Container()
+        self.children_container = Container()
         self.field_container = Container()
         self.used_field_container = Container()
         self.parent_identifiers = []
@@ -32,3 +33,9 @@ class JavaClass:
 
     def parent_list(self):
         yield from self.parent_container.element_list()
+
+    def add_child(self, child):
+        self.children_container.add_element(child)
+
+    def children_list(self):
+        yield from self.children_container.element_list()
