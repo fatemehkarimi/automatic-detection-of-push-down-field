@@ -27,20 +27,29 @@ class PushDownFieldDetector:
                     j_class_non_private_fields.add_element(def_field)
                     class_usage_dic[def_field.get_identifier()] = []
 
-            self.detect_class_push_down_positions(j_class, j_class_non_private_fields, class_usage_dic)
+            self.detect_class_push_down_positions(j_class, j_class_non_private_fields, class_usage_dic, True)
             self.project_usage_dic[j_class.get_identifier()] = class_usage_dic
 
-    def detect_class_push_down_positions(self, j_class, def_fields_container, class_usage_dic):
+    def detect_class_push_down_positions(self, j_class, def_fields_container, class_usage_dic, parent_call):
         new_def_field_container = Container()
         for def_field in def_fields_container.element_list():
-            if j_class.get_used_field_container().has_element(def_field.get_identifier()):
-                class_usage_dic[def_field.get_identifier()].append(j_class)
+            if parent_call:
+                if j_class.get_used_field_container().has_element(def_field.get_identifier()):
+                    class_usage_dic[def_field.get_identifier()].append(j_class)
+                else:
+                    new_def_field_container.add_element(
+                        def_fields_container.get_element_by_identifier(def_field.get_identifier()))
             else:
-                new_def_field_container.add_element(
-                    def_fields_container.get_element_by_identifier(def_field.get_identifier()))
+                if not j_class.get_field_container().has_element(def_field.get_identifier()):
+                    if j_class.get_used_field_container().has_element(def_field.get_identifier()):
+                        class_usage_dic[def_field.get_identifier()].append(j_class)
+                    else:
+                        new_def_field_container.add_element(
+                            def_fields_container.get_element_by_identifier(def_field.get_identifier()))
 
         for child_class in j_class.children_list():
-            self.detect_class_push_down_positions(child_class, new_def_field_container, class_usage_dic)
+            self.detect_class_push_down_positions(
+                child_class, new_def_field_container, class_usage_dic, False)
 
     def print_report(self):
         project_needs_refactoring = False
