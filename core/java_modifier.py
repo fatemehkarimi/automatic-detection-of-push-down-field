@@ -13,7 +13,7 @@ class JavaModifier:
         self.PROTECTED = flag
 
     def set_private_flag(self, flag):
-        self.FINAL = flag
+        self.PRIVATE = flag
 
     def set_final_flag(self, flag):
         self.FINAL = flag

@@ -138,6 +138,7 @@ class ClassExtractorListener(JavaParserLabeledListener):
 
         for variable in ctx.constantDeclarator():
             java_field = JavaField(variable.IDENTIFIER().getText())
-            java_field.set_modifier(java_field)
+            java_field.set_modifier(field_modifier)
             java_field.set_type(field_type)
             j_class.add_field(java_field)
+

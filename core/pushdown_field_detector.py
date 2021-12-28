@@ -21,9 +21,13 @@ class PushDownFieldDetector:
     def detect_project_push_down_positions(self):
         for j_class in self.project_class_container.element_list():
             class_usage_dic = {}
+            j_class_non_private_fields = Container()
             for def_field in j_class.field_list():
-                class_usage_dic[def_field.get_identifier()] = []
-            self.detect_class_push_down_positions(j_class, j_class.get_field_container(), class_usage_dic)
+                if not def_field.get_modifier().is_private():
+                    j_class_non_private_fields.add_element(def_field)
+                    class_usage_dic[def_field.get_identifier()] = []
+
+            self.detect_class_push_down_positions(j_class, j_class_non_private_fields, class_usage_dic)
             self.project_usage_dic[j_class.get_identifier()] = class_usage_dic
 
     def detect_class_push_down_positions(self, j_class, def_fields_container, class_usage_dic):
