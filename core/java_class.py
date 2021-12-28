@@ -25,6 +25,15 @@ class JavaClass:
     def add_used_field(self, field):
         self.used_field_container.add_element(field)
 
+    def add_child(self, child):
+        self.children_container.add_element(child)
+
+    def get_used_field_container(self):
+        return self.used_field_container
+
+    def get_field_container(self):
+        return self.field_container
+
     def field_list(self):
         yield from self.field_container.element_list()
 
@@ -33,9 +42,6 @@ class JavaClass:
 
     def parent_list(self):
         yield from self.parent_container.element_list()
-
-    def add_child(self, child):
-        self.children_container.add_element(child)
 
     def children_list(self):
         yield from self.children_container.element_list()

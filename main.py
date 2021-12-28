@@ -7,6 +7,8 @@ def main(arguments):
     detector = PushDownFieldDetector(arguments.path)
     detector.extract_project_classes()
     detector.extract_field_usage()
+    detector.detect_project_push_down_positions()
+    detector.print_report()
 
 
 if __name__ == "__main__":
