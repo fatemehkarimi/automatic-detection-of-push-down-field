@@ -27,10 +27,17 @@ class PushDownFieldDetector:
                     j_class_non_private_fields.add_element(def_field)
                     class_usage_dic[def_field.get_identifier()] = []
 
-            self.detect_class_push_down_positions(j_class, j_class_non_private_fields, class_usage_dic, True)
+            visited_nodes = set()
+            self.detect_class_push_down_positions(
+                j_class, j_class_non_private_fields, class_usage_dic, visited_nodes, True)
+
             self.project_usage_dic[j_class.get_identifier()] = class_usage_dic
 
-    def detect_class_push_down_positions(self, j_class, def_fields_container, class_usage_dic, parent_call):
+    def detect_class_push_down_positions(
+            self, j_class, def_fields_container, class_usage_dic, visited_nodes, parent_call):
+        if j_class.get_identifier() in visited_nodes:
+            return
+        visited_nodes.add(j_class.get_identifier())
         new_def_field_container = Container()
         for def_field in def_fields_container.element_list():
             if parent_call:
@@ -49,7 +56,7 @@ class PushDownFieldDetector:
 
         for child_class in j_class.children_list():
             self.detect_class_push_down_positions(
-                child_class, new_def_field_container, class_usage_dic, False)
+                child_class, new_def_field_container, class_usage_dic, visited_nodes, False)
 
     def print_report(self):
         project_needs_refactoring = False

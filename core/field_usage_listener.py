@@ -119,11 +119,13 @@ class FieldUsageListener(JavaParserLabeledListener):
             self.current_method.add_local_variable(j_field)
 
     def enterExpression0(self, ctx:JavaParserLabeled.Expression0Context):
-        if not self.current_method:
-            return
         if not isinstance(ctx.primary(), JavaParserLabeled.Primary4Context):
             return
         used_var = JavaField(ctx.primary().IDENTIFIER().getText())
+        if not self.current_method and self.class_stack:
+            j_class = self.class_stack[-1]
+            j_class.add_used_field(used_var)
+            return
         self.used_variable_container.add_element(used_var)
 
     def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
